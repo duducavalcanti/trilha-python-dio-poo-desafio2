@@ -169,7 +169,7 @@ class Historico:
             {
                 "tipo": transacao.__class__.__name__,
                 "valor": transacao.valor,
-                "data": datetime.now().strftime("%d-%m-%Y %H:%M:%s"),
+                "data": datetime.now().strftime("%d-%m-%Y %H:%M:%S"),
             }
         )
 
@@ -246,14 +246,29 @@ def filtrar_cliente(cpf, clientes):
     return clientes_filtrados[0] if clientes_filtrados else None
 
 
-# Retorna a conta do cliente (a primeira da lista).
+# Retorna a conta do cliente.
 def recuperar_conta_cliente(cliente):
     if not cliente.contas:
         print("\n@@@ Cliente não possui conta! @@@")
-        return
+        return None
 
-    # FIXME: não permite cliente escolher a conta.
-    return cliente.contas[0]
+    # Se houver apenas uma conta, retorna direto
+    if len(cliente.contas) == 1:
+        return cliente.contas[0]
+
+    # Se houver mais de uma, lista para escolha
+    print("\nContas disponíveis:")
+    for i, conta in enumerate(cliente.contas, start=1):
+        print(f"{i} - Conta {conta.numero} Agência {conta.agencia}")
+    
+    while True:
+        try:
+            escolha = int(input("Escolha a conta pelo número: ")) - 1
+            if 0 <= escolha < len(cliente.contas):
+                return cliente.contas[escolha]
+            print("@@@ Número inválido, tente novamente! @@@")
+        except ValueError:
+            print("@@@ Entrada inválida, digite um número! @@@")
 
 
 # Função para realizar depósito.
@@ -400,6 +415,7 @@ def listar_contas_por_usuario(clientes):
     for conta in cliente.contas:
         print("=" * 100)
         print(textwrap.dedent(str(conta)))
+        print(f"Saldo:\t\tR$ {conta.saldo:.2f}")
 
 
 # Função principal que controla o fluxo do programa.
